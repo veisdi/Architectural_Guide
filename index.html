@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Архитектурный гид по Санкт-Петербургу</title>
+    <style>
+        /* Карта должна иметь высоту, иначе она не отобразится */
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+    </style>
+    
+    <!-- Подключение Яндекс.Карт через CDN -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=9ff693a5-84df-4f48-bcd6-6a41b8901652&lang=ru_RU" type="text/javascript"></script>
+</head>
+<body>
+
+    <h1>Архитектурный гид по Санкт-Петербургу</h1>
+    <p>Интерактивная карта архитектурных объектов.</p>
+    
+    <!-- Контейнер для карты -->
+    <div id="map"></div>
+
+    <script type="text/javascript">
+        // Функция инициализации карты
+        ymaps.ready(init);
+
+        function init(){
+            // Создание карты.
+            var myMap = new ymaps.Map("map", {
+                // Координаты центра карты (Санкт-Петербург)
+                center: [59.938631, 30.314133], 
+                // Уровень масштабирования (0–19)
+                zoom: 12
+            });
+
+            // Можно добавить метку для теста
+            var myPlacemark = new ymaps.Placemark([59.938631, 30.314133], {
+                hintContent: 'Санкт-Петербург',
+                balloonContent: 'Центр города'
+            });
+
+            myMap.geoObjects.add(myPlacemark);
+        }
+    </script>
+
+</body>
+</html>
