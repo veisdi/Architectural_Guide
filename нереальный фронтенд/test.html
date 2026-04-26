@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Cormorant Garamond', serif;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('./images/bg1.png');
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('./images/bg1.jpg');
             background-size: cover;
             background-position: center;
             color: #333;
@@ -28,9 +28,9 @@
         }
 
         .test-container {
-            max-width: 700px;
+            max-width: 750px;
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(255, 255, 255, 0.97);
             backdrop-filter: blur(10px);
             padding: 50px 40px;
             border-radius: 25px;
@@ -38,7 +38,24 @@
             position: relative;
         }
 
-        /* Прогресс */
+        /* Прогресс бар */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        /* Прогресс текст */
         .progress-header {
             display: flex;
             justify-content: space-between;
@@ -77,15 +94,16 @@
 
         .option {
             display: flex;
-            align-items: center;
-            padding: 18px 25px;
+            align-items: flex-start;
+            padding: 20px 25px;
             margin-bottom: 15px;
             background: #f8f9fa;
             border: 2px solid #e9ecef;
             border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 1.2em;
+            font-size: 1.15em;
+            line-height: 1.4;
         }
 
         .option:hover {
@@ -114,6 +132,7 @@
             position: relative;
             transition: all 0.3s ease;
             flex-shrink: 0;
+            margin-top: 3px;
         }
 
         .option.selected .custom-radio {
@@ -199,7 +218,7 @@
             }
 
             .option {
-                font-size: 1.1em;
+                font-size: 1.05em;
                 padding: 15px 20px;
             }
 
@@ -227,86 +246,358 @@
                 transform: translateY(0);
             }
         }
+
+        /* Страница результатов */
+        .result-container {
+            display: none;
+            text-align: center;
+        }
+
+        .result-style {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-description {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .result-route {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result-route h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .result-route p {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 50px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
     </style>
 </head>
 <body>
 
     <div class="test-container">
-        <!-- Прогресс -->
+        <!-- Прогресс бар -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <!-- Прогресс текст -->
         <div class="progress-header">
-            <span>Вопрос <span id="current-question">3</span> из <span id="total-questions">10</span></span>
+            <span>Вопрос <span id="current-question">1</span> из <span id="total-questions">15</span></span>
             <span class="progress-arrow">===></span>
         </div>
 
-        <!-- Вопрос -->
-        <div class="question fade-in" id="question-text">
-            Вам нравятся плавные линии?
+        <!-- Контейнер вопроса -->
+        <div id="question-container">
+            <div class="question fade-in" id="question-text">
+                <!-- Вопрос будет здесь -->
+            </div>
+
+            <div class="options" id="options-container">
+                <!-- Варианты ответов будут здесь -->
+            </div>
+
+            <!-- Кнопки навигации -->
+            <div class="navigation">
+                <button class="btn btn-back" id="btn-back" disabled>
+                    ← Назад
+                </button>
+                <button class="btn btn-next" id="btn-next" disabled>
+                    Далее →
+                </button>
+            </div>
         </div>
 
-        <!-- Варианты ответов -->
-        <div class="options" id="options-container">
-            <label class="option">
-                <input type="radio" name="answer" value="yes">
-                <span class="custom-radio"></span>
-                <span>Да</span>
-            </label>
-
-            <label class="option">
-                <input type="radio" name="answer" value="no">
-                <span class="custom-radio"></span>
-                <span>Нет</span>
-            </label>
-
-            <label class="option">
-                <input type="radio" name="answer" value="sometimes">
-                <span class="custom-radio"></span>
-                <span>Иногда</span>
-            </label>
-        </div>
-
-        <!-- Кнопки навигации -->
-        <div class="navigation">
-            <button class="btn btn-back" id="btn-back" disabled>
-                ← Назад
-            </button>
-            <button class="btn btn-next" id="btn-next" disabled>
-                Далее →
+        <!-- Контейнер результатов -->
+        <div class="result-container" id="result-container">
+            <h2 class="result-style" id="result-style">
+                <!-- Стиль будет здесь -->
+            </h2>
+            <p class="result-description" id="result-description">
+                <!-- Описание будет здесь -->
+            </p>
+            <div class="result-route">
+                <h3>Ваш маршрут</h3>
+                <p id="result-route-text">
+                    <!-- Маршрут будет здесь -->
+                </p>
+            </div>
+            <button class="btn-restart" onclick="location.reload()">
+                🔄 Пройти тест ещё раз
             </button>
         </div>
     </div>
 
     <script>
-        // ===== ЗАГЛУШКИ ДЛЯ ДАННЫХ (потом заменит другой разработчик) =====
-        const testData = {
-            currentQuestion: 3,
-            totalQuestions: 10,
-            questions: [
-                { id: 1, text: "Вам нравятся плавные линии?", options: ["Да", "Нет", "Иногда"] },
-                { id: 2, text: "Какой цвет вам ближе?", options: ["Пастельные тона", "Яркие цвета", "Монохром"] },
-                // ... остальные вопросы
-            ],
-            answers: {} // здесь будут храниться ответы
+        // ===== ДАННЫЕ ТЕСТА =====
+        const questions = [
+            {
+                id: 1,
+                text: "Какое утро вам ближе в последнее время?",
+                options: [
+                    { text: "Хочется медленно просыпаться под звуки фонтана, пить кофе с видом на колонны — спокойно и величаво", style: "classicism" },
+                    { text: "Тянет встать пораньше и встретить рассвет над Невой — хочется динамики и свежего воздуха", style: "constructivism" },
+                    { text: "Начинаю день с эспрессо в минималистичном пространстве — ценю тишину и функциональность", style: "constructivism" },
+                    { text: "Хочется бродить по тихим улочкам, разглядывая детали — настроение созерцать и открывать", style: "modern" }
+                ]
+            },
+            {
+                id: 2,
+                text: "В каком интерьере вам хочется оказаться сегодня?",
+                options: [
+                    { text: "Высокие потолки, лепнина, хрусталь — хочется почувствовать торжественность момента", style: "stalin" },
+                    { text: "Плавные линии, витражи, мягкий свет — тянет к уюту и природной гармонии", style: "modern" },
+                    { text: "Чистые формы, много воздуха, ничего лишнего — нужно пространство для мыслей", style: "constructivism" },
+                    { text: "Роскошные ткани, золото, массив — хочется роскоши и ощущения праздника", style: "stalin" }
+                ]
+            },
+            {
+                id: 3,
+                text: "Что сейчас вдохновляет вас больше всего?",
+                options: [
+                    { text: "Мощь и масштаб — когда рядом что-то грандиозное, чувствуешь прилив сил", style: "stalin" },
+                    { text: "Гармония и порядок — всё на своих местах, ничто не отвлекает", style: "classicism" },
+                    { text: "Природные формы, изгибы, живые линии — хочется красоты и поэзии", style: "modern" },
+                    { text: "Логика и функции — когда всё просто, понятно и работает", style: "constructivism" }
+                ]
+            },
+            {
+                id: 4,
+                text: "Как вам хочется провести вечер в ближайшее время?",
+                options: [
+                    { text: "Торжественный ужин в ресторане с высокими сводами — хочется особого настроения", style: "stalin" },
+                    { text: "Прогуляться по набережной, посмотреть на игру света — нужно переключиться", style: "modern" },
+                    { text: "Тихий вечер в лофте с хорошим фильмом — хочется отдохнуть от суеты", style: "constructivism" },
+                    { text: "Сходить на выставку или в театр в необычном здании — тянет к новому опыту", style: "modern" }
+                ]
+            },
+            {
+                id: 5,
+                text: "К какой текстуре сейчас тянется рука?",
+                options: [
+                    { text: "Гладкий мрамор — холодный, благородный, уверенный", style: "classicism" },
+                    { text: "Тёплое дерево с узорами — уютное, живое, тактильное", style: "modern" },
+                    { text: "Стекло или бетон — современные, честные, без прикрас", style: "constructivism" },
+                    { text: "Бархат или шёлк — мягкие, роскошные, обволакивающие", style: "stalin" }
+                ]
+            },
+            {
+                id: 6,
+                text: "Что сейчас важнее для вас в пространстве вокруг?",
+                options: [
+                    { text: "Чтобы впечатляло — масштаб, высота, ощущение значимости", style: "stalin" },
+                    { text: "Чтобы всё было гармонично — пропорции, симметрия, баланс", style: "classicism" },
+                    { text: "Чтобы радовали детали — декор, орнаменты, неожиданные решения", style: "modern" },
+                    { text: "Чтобы всё работало — удобно, практично, без лишнего", style: "constructivism" }
+                ]
+            },
+            {
+                id: 7,
+                text: "Какой саундтрек подошёл бы вашей прогулке сегодня?",
+                options: [
+                    { text: "Мощная симфония — торжественная, структурированная, вдохновляющая", style: "stalin" },
+                    { text: "Лаунж или джаз — плавный, атмосферный, с импровизацией", style: "modern" },
+                    { text: "Минимал или электроника — ритмичная, лаконичная, современная", style: "constructivism" },
+                    { text: "Камерная музыка или фортепиано — изящная, утончённая, спокойная", style: "classicism" }
+                ]
+            },
+            {
+                id: 8,
+                text: "Какая цветовая палитра откликается вам сейчас?",
+                options: [
+                    { text: "Золото, бордо, глубокий синий — насыщенные, царственные, драматичные", style: "stalin" },
+                    { text: "Белый, бежевый, пастель — спокойные, светлые, элегантные", style: "classicism" },
+                    { text: "Терракота, охра, зелень — природные, тёплые, живые", style: "modern" },
+                    { text: "Черно-белая гамма, серый, металл — строгие, контрастные, современные", style: "constructivism" }
+                ]
+            },
+            {
+                id: 9,
+                text: "Какая эпоха Петербурга ближе вам по настроению сегодня?",
+                options: [
+                    { text: "Императорское величие — балы, триумфы, ощущение истории", style: "stalin" },
+                    { text: "Эпоха просвещения — рационализм, наука, ясность мысли", style: "classicism" },
+                    { text: "Серебряный век — поэзия, искусство, богемная свобода", style: "modern" },
+                    { text: "Советский авангард — эксперименты, новые идеи, смелость", style: "constructivism" }
+                ]
+            },
+            {
+                id: 10,
+                text: "Сколько времени вы готовы посвятить прогулке сегодня?",
+                options: [
+                    { text: "Хочу гулять долго — 3-4 часа, исследовать каждый уголок", style: "stalin", time: "long" },
+                    { text: "Оптимально 2-2.5 часа — не спеша, но основательно", style: "constructivism", time: "medium-long" },
+                    { text: "Около 1.5 часов — достаточно для главного", style: "modern", time: "medium" },
+                    { text: "Максимум час — хочу быстро увидеть самое интересное", style: "classicism", time: "short" }
+                ]
+            },
+            {
+                id: 11,
+                text: "Как бы вы описали своё внутреннее состояние сегодня?",
+                options: [
+                    { text: "Чувствую прилив энергии — хочется действовать, двигаться вперёд, покорять вершины", style: "stalin" },
+                    { text: "Внутри спокойствие и равновесие — хочется созерцать, размышлять, наслаждаться моментом", style: "classicism" },
+                    { text: "Душа просит красоты и вдохновения — тянет к чему-то нежному, поэтичному, возвышенному", style: "modern" },
+                    { text: "Немного устал(а) от мира — хочется простоты, тишины, побыть наедине с мыслями", style: "constructivism" }
+                ]
+            },
+            {
+                id: 12,
+                text: "Что сейчас нужно вашей душе больше всего?",
+                options: [
+                    { text: "Почувствовать себя частью чего-то великого — истории, эпохи, триумфа", style: "stalin" },
+                    { text: "Гармонии и порядка — чтобы внутри и вокруг всё встало на свои места", style: "classicism" },
+                    { text: "Лёгкости и красоты — чтобы сердце забилось чаще от увиденного", style: "modern" },
+                    { text: "Пространства и свободы — воздуха, места, чтобы выдохнуть и перезагрузиться", style: "constructivism" }
+                ]
+            },
+            {
+                id: 13,
+                text: "С каким состоянием природы вы себя ассоциируете сегодня?",
+                options: [
+                    { text: "Гроза и мощь стихии — чувствую силу, страсть, эмоциональный подъём", style: "stalin" },
+                    { text: "Тихое утро после дождя — свежесть, ясность, обновлённость", style: "classicism" },
+                    { text: "Цветущий сад — нежность, романтика, расцвет чувств", style: "modern" },
+                    { text: "Горный пейзаж — чистота, строгость, ясность мысли", style: "constructivism" }
+                ]
+            },
+            {
+                id: 14,
+                text: "Какой темп жизни вам близок в последнее время?",
+                options: [
+                    { text: "Быстрый и насыщенный — успеваю много, живу на полную, люблю вызовы", style: "stalin" },
+                    { text: "Размеренный и осознанный — ценю качество, не люблю спешку, всё по плану", style: "classicism" },
+                    { text: "Плавный и текучий — живу по настроению, позволяю событиям течь естественно", style: "modern" },
+                    { text: "Замедленный и минималистичный — отсекаю лишнее, фокусируюсь на главном", style: "constructivism" }
+                ]
+            },
+            {
+                id: 15,
+                text: "Что для вас сейчас значит «идеальный день»?",
+                options: [
+                    { text: "День достижений — когда сделано что-то значимое, есть результат и признание", style: "stalin" },
+                    { text: "День гармонии — когда всё идёт по плану, ничего не выбивает из колеи", style: "classicism" },
+                    { text: "День открытий — когда увидел что-то прекрасное, unexpected, вдохновляющее", style: "modern" },
+                    { text: "День покоя — когда никто не тревожит, можно просто быть собой", style: "constructivism" }
+                ]
+            }
+        ];
+
+        // Описания стилей
+        const styleDescriptions = {
+            stalin: "Сталинский ампир",
+            classicism: "Классицизм",
+            modern: "Модерн",
+            constructivism: "Конструктивизм"
+        };
+
+        const styleDetails = {
+            stalin: {
+                description: "Ваш выбор — величие и монументальность! Вас привлекают масштабные формы, торжественность и ощущение истории. Сегодня вам нужен Петербург, который впечатляет и возвышает.",
+                routes: {
+                    "long": "Маршрут по сталинскому ампру (3-4 часа): Проспект Стачек, площадь Стачек, станция метро «Нарвская», Московский проспект, главные сталинские ансамбли. Вы увидите монументальные здания, широкие проспекты и почувствуете мощь эпохи.",
+                    "medium-long": "Маршрут по сталинской архитектуре (2.5 часа): Московский район, основные сталинские ансамбли, ключевые точки конструктивизма.",
+                    "medium": "Экспресс-маршрут (1.5 часа): Основные объекты сталинского ампира в центре.",
+                    "short": "Быстрый маршрут (1 час): Главные символы эпохи."
+                }
+            },
+            classicism: {
+                description: "Ваш выбор — гармония и элегантность! Вас привлекают чистые линии, симметрия и утончённость. Сегодня вам нужен Петербург, который радует совершенством форм и спокойствием.",
+                routes: {
+                    "long": "Маршрут по классицизму (3-4 часа): Дворцовая площадь, Адмиралтейство, Исаакиевский собор, Сенатская площадь, Стрелка Васильевского острова. Классический Петербург во всём великолепии.",
+                    "medium-long": "Классический Петербург (2.5 часа): Основные ансамбли центра, главные площади.",
+                    "medium": "Экспресс-классика (1.5 часа): Дворцовая площадь и окрестности.",
+                    "short": "Быстрая классика (1 час): Дворцовая площадь, Адмиралтейство — самое главное."
+                }
+            },
+            modern: {
+                description: "Ваш выбор — красота и поэзия! Вас привлекают плавные линии, декоративность и романтическое настроение. Сегодня вам нужен Петербург, который вдохновляет и очаровывает деталями.",
+                routes: {
+                    "long": "Маршрут по модерну (3-4 часа): Улица Рубинштейна, Литейный проспект, особняки в стиле модерн, витражи и декор. Романтический Петербург Серебряного века.",
+                    "medium-long": "Модерн Петербурга (2.5 часа): Основные улицы с архитектурой модерна.",
+                    "medium": "Экспресс-модерн (1.5 часа): Улица Рубинштейна и окрестности.",
+                    "short": "Быстрый модерн (1 час): Главные особняки в стиле модерн."
+                }
+            },
+            constructivism: {
+                description: "Ваш выбор — функциональность и геометрия! Вас привлекают чистые формы, минимализм и современные решения. Сегодня вам нужен Петербург, который удивляет смелостью идей.",
+                routes: {
+                    "long": "Маршрут по конструктивизму (3-4 часа): Нарвская застава, Московские ворота, проспект Стачек, жилмассивы 1920-30-х годов. Авангардный Петербург.",
+                    "medium-long": "Конструктивизм (2.5 часа): Московский район, Нарвская застава, ключевые объекты.",
+                    "medium": "Экспресс-конструктивизм (1.5 часа): Основные объекты конструктивизма.",
+                    "short": "Быстрый конструктивизм (1 час): Главные символы авангарда."
+                }
+            }
+        };
+
+        // ===== СОСТОЯНИЕ ТЕСТА =====
+        let currentQuestion = 0;
+        let answers = {};
+        let scores = {
+            stalin: 0,
+            classicism: 0,
+            modern: 0,
+            constructivism: 0
         };
 
         // ===== ЭЛЕМЕНТЫ DOM =====
+        const progressFill = document.getElementById('progress-fill');
         const currentQuestionEl = document.getElementById('current-question');
         const totalQuestionsEl = document.getElementById('total-questions');
         const questionTextEl = document.getElementById('question-text');
         const optionsContainer = document.getElementById('options-container');
         const btnBack = document.getElementById('btn-back');
         const btnNext = document.getElementById('btn-next');
+        const questionContainer = document.getElementById('question-container');
+        const resultContainer = document.getElementById('result-container');
 
         // ===== ИНИЦИАЛИЗАЦИЯ =====
-        function init() {
-            currentQuestionEl.textContent = testData.currentQuestion;
-            totalQuestionsEl.textContent = testData.totalQuestions;
-            loadQuestion(testData.currentQuestion);
-        }
+        totalQuestionsEl.textContent = questions.length;
+        loadQuestion(0);
 
         // ===== ЗАГРУЗКА ВОПРОСА =====
-        function loadQuestion(questionNumber) {
-            const question = testData.questions.find(q => q.id === questionNumber);
-            if (!question) return;
+        function loadQuestion(index) {
+            const question = questions[index];
+            
+            // Обновляем прогресс
+            const progress = ((index + 1) / questions.length) * 100;
+            progressFill.style.width = progress + '%';
+            currentQuestionEl.textContent = index + 1;
 
             // Обновляем текст вопроса с анимацией
             questionTextEl.classList.remove('fade-in');
@@ -316,44 +607,46 @@
 
             // Создаем варианты ответов
             optionsContainer.innerHTML = '';
-            question.options.forEach((optionText, index) => {
-                const optionValues = ['yes', 'no', 'sometimes'];
-                const option = createOptionElement(optionText, optionValues[index]);
-                optionsContainer.appendChild(option);
+            question.options.forEach((option, optIndex) => {
+                const optionEl = createOptionElement(option, optIndex);
+                optionsContainer.appendChild(optionEl);
             });
 
             // Восстанавливаем выбранный ответ, если есть
-            if (testData.answers[questionNumber]) {
-                const selectedRadio = document.querySelector(`input[value="${testData.answers[questionNumber]}"]`);
-                if (selectedRadio) {
-                    selectedRadio.checked = true;
-                    selectedRadio.parentElement.classList.add('selected');
-                    updateButtons();
+            if (answers[index] !== undefined) {
+                const selectedOption = optionsContainer.children[answers[index]];
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
                 }
             }
 
-            // Обновляем состояние кнопок
+            // Обновляем кнопки
             updateButtons();
         }
 
         // ===== СОЗДАНИЕ ЭЛЕМЕНТА ВАРИАНТА ОТВЕТА =====
-        function createOptionElement(text, value) {
+        function createOptionElement(option, index) {
             const label = document.createElement('label');
             label.className = 'option';
             label.innerHTML = `
-                <input type="radio" name="answer" value="${value}">
+                <input type="radio" name="answer" value="${index}">
                 <span class="custom-radio"></span>
-                <span>${text}</span>
+                <span>${option.text}</span>
             `;
 
             // Обработчик клика
-            label.addEventListener('click', function() {
+            label.addEventListener('click', function(e) {
+                e.preventDefault();
+                
                 // Убираем выделение со всех вариантов
                 document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                
                 // Выделяем текущий
                 this.classList.add('selected');
+                
                 // Сохраняем ответ
-                testData.answers[testData.currentQuestion] = value;
+                answers[currentQuestion] = index;
+                
                 // Обновляем кнопки
                 updateButtons();
             });
@@ -363,36 +656,97 @@
 
         // ===== ОБНОВЛЕНИЕ СОСТОЯНИЯ КНОПОК =====
         function updateButtons() {
-            const hasAnswer = testData.answers[testData.currentQuestion];
+            const hasAnswer = answers[currentQuestion] !== undefined;
             
             // Кнопка "Далее" активна только если есть ответ
             btnNext.disabled = !hasAnswer;
             
             // Кнопка "Назад" активна, если это не первый вопрос
-            btnBack.disabled = testData.currentQuestion === 1;
+            btnBack.disabled = currentQuestion === 0;
         }
 
         // ===== ОБРАБОТЧИКИ КНОПОК =====
         btnBack.addEventListener('click', () => {
-            if (testData.currentQuestion > 1) {
-                testData.currentQuestion--;
-                init();
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion(currentQuestion);
             }
         });
 
         btnNext.addEventListener('click', () => {
-            if (testData.answers[testData.currentQuestion] && testData.currentQuestion < testData.totalQuestions) {
-                testData.currentQuestion++;
-                init();
-            } else if (testData.currentQuestion === testData.totalQuestions) {
-                // Последний вопрос — показываем результаты
-                alert('Тест завершен! Здесь будет страница с результатами.');
-                // window.location.href = '/result.html';
+            if (answers[currentQuestion] !== undefined) {
+                // Сохраняем баллы
+                const selectedOption = questions[currentQuestion].options[answers[currentQuestion]];
+                scores[selectedOption.style]++;
+
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion(currentQuestion);
+                } else {
+                    // Показываем результаты
+                    showResults();
+                }
             }
         });
 
-        // Запускаем
-        init();
+        // ===== ПОДСЧЁТ РЕЗУЛЬТАТОВ =====
+        function calculateResult() {
+            // Находим стиль с максимальным количеством баллов
+            let maxScore = 0;
+            let resultStyle = 'stalin';
+
+            for (const [style, score] of Object.entries(scores)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    resultStyle = style;
+                }
+            }
+
+            // Определяем время из вопроса 10
+            const timeAnswer = answers[9]; // Вопрос 10 (индекс 9)
+            let timeCategory = 'medium';
+            
+            if (timeAnswer === 0) timeCategory = 'long';
+            else if (timeAnswer === 1) timeCategory = 'medium-long';
+            else if (timeAnswer === 2) timeCategory = 'medium';
+            else if (timeAnswer === 3) timeCategory = 'short';
+
+            return {
+                style: resultStyle,
+                time: timeCategory
+            };
+        }
+
+        // ===== ПОКАЗ РЕЗУЛЬТАТОВ =====
+        function showResults() {
+            const result = calculateResult();
+            window.location.href = `result.html?style=${result.style}&time=${result.time}`;
+        }
+
+        // ===== ОТПРАВКА РЕЗУЛЬТАТОВ (заглушка) =====
+        function sendResultsToServer(result) {
+            // TODO: Отправить данные на сервер
+            console.log('Результат теста:', result);
+            console.log('Ответы:', answers);
+            console.log('Баллы:', scores);
+            
+            // Пример отправки:
+            /*
+            fetch('/api/test-results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    style: result.style,
+                    time: result.time,
+                    answers: answers,
+                    scores: scores,
+                    timestamp: new Date().toISOString()
+                })
+            });
+            */
+        }
     </script>
 
 </body>
