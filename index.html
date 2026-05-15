@@ -28,6 +28,29 @@
             transition: background-image 1s ease-in-out;
         }
 
+        .container {
+            opacity: 0; 
+            visibility: hidden;
+            transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+            
+            /* Остальные ваши стили остаются без изменений */
+            max-width: 800px;
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.12);
+            padding: 50px 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Класс, который мы добавим через JS для показа */
+        .container.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
         /* Декоративные элементы */
         .decoration {
             position: fixed;
@@ -36,6 +59,10 @@
             z-index: 0;
             font-size: 180px;
             filter: blur(1px);
+        }
+
+        .decoration.visible {
+            opacity: 0.12; /* Возвращаем исходную прозрачность */
         }
 
         .decoration-left {
@@ -48,18 +75,6 @@
             right: -20px;
             top: 50%;
             transform: translateY(-50%);
-        }
-
-        .container {
-            max-width: 800px;
-            backdrop-filter: blur(8px);
-            background-color: rgba(255, 255, 255, 0.12);
-            padding: 50px 40px;
-            border-radius: 25px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 1;
-            border: 1px solid rgba(255,255,255,0.2);
         }
 
         h1 {
@@ -115,6 +130,11 @@
             display: flex;
             gap: 12px;
             z-index: 10;
+            opacity: 0; /* Скрываем индикатор тоже */
+        }
+
+        .slide-indicator.visible {
+            opacity: 1;
         }
 
         .dot {
@@ -164,6 +184,28 @@
     </div>
 
     <script>
+        window.addEventListener('load', function() {
+            // Задержка в миллисекундах (например, 600 мс = 0.8 секунды)
+            const delay = 4700; 
+
+            setTimeout(function() {
+                // 1. Показываем основной контейнер с текстом
+                const mainContainer = document.querySelector('.container');
+                if (mainContainer) {
+                    mainContainer.classList.add('visible');
+                }
+                
+                // 2. Показываем декоративные элементы (колонны)
+                const decorations = document.querySelectorAll('.decoration');
+                decorations.forEach(el => el.classList.add('visible'));
+                
+                // 3. Показываем индикатор слайдов (точки внизу)
+                const indicator = document.querySelector('.slide-indicator');
+                if (indicator) {
+                    indicator.classList.add('visible');
+                }
+            }, delay);
+        });
         // Слайд-шоу
         const backgrounds = [
             'asserts/images/bg1.png',
@@ -194,7 +236,7 @@
             updateDots();
         }
 
-        // Автопереключение каждые 6 секунд
+        // Автопереключение каждые  секунд
         setInterval(changeBackground, 6000);
     </script>
 

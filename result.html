@@ -494,10 +494,10 @@
     <script>
         // ===== ДАННЫЕ ОБЪЕКТОВ (Встроены для скорости) =====
         const allObjects = [
-                        { id: 4, name: "Особняк Кшесинской", style: "moderne", coords: [59.954414, 30.324668], description: "Дворец балерины Матильды Кшесинской. Образец роскошного модерна.", photoUrl: "asserts/images/osobnyak_kshesinskoi.jpg" },
-                        { id: 2, name: "Дом Зингера", style: "moderne", coords: [59.935633, 30.326033], description: "Знаменитое здание книжного магазина «Зингер». Яркий пример северного модерна.", photoUrl: "asserts/images/zinger-house.jpg" },
-            { id: 3, name: "Гостиница «Астория»", style: "moderne", coords: [59.932849, 30.308801], description: "Роскошная гостиница в стиле модерн с элементами неоклассики.", photoUrl: "asserts/images/astoria.jpg" },
-            { id: 1, name: "Дом Елисеевых", style: "moderne", coords: [59.928586, 30.337694], description: "Великолепный торговый дом с витражными окнами.", photoUrl: "asserts/images/dom_eliseevich.jpg" },
+            { id: 1, name: "Особняк Кшесинской", style: "moderne", coords: [59.954414, 30.324668], description: "Дворец балерины Матильды Кшесинской. Образец роскошного модерна.", photoUrl: "asserts/images/osobnyak_kshesinskoi.jpg" },
+            { id: 2, name: "Гостиница «Астория»", style: "moderne", coords: [59.932849, 30.308801], description: "Роскошная гостиница в стиле модерн с элементами неоклассики.", photoUrl: "asserts/images/astoria.jpg" },
+            { id: 3, name: "Дом Зингера", style: "moderne", coords: [59.935633, 30.326033], description: "Знаменитое здание книжного магазина «Зингер». Яркий пример северного модерна.", photoUrl: "asserts/images/zinger-house.jpg" },
+            { id: 4, name: "Дом Елисеевых", style: "moderne", coords: [59.934593, 30.337943], description: "Великолепный торговый дом с витражными окнами.", photoUrl: "asserts/images/dom_eliseevich.jpg" },
             // { id: 5, name: "Дом Бенуа", style: "moderne", coords: [59.962415, 30.312943], description: "Доходный дом архитектора Леонида Бенуа. Яркий пример северного модерна.", photoUrl: "asserts/images/dom_benua.jpg" },
             
             { id: 6, name: "Казанский собор", style: "classic", coords: [59.935185, 30.325069], description: "Величественный собор в стиле классицизма с колоннадой.", photoUrl: "asserts/images/kazanskiy_sobor.jpg" },
@@ -640,6 +640,20 @@
                     <div class="obj-name">${index + 1}. ${obj.name}</div>
                     <div class="obj-desc">${obj.description}</div>
                 `;
+                div.addEventListener('click', function() {
+                    // Находим метку на карте, у которой такой же ID объекта в свойствах
+                    const placemarkToOpen = myMap.geoObjects.getObjects().find(pm => pm.properties.get('objectId') === obj.id);
+                    
+                    if (placemarkToOpen) {
+                        // Открываем балун этой метки
+                        placemarkToOpen.balloon.open();
+                        
+                        // Центрируем карту на этой метке для удобства
+                        myMap.setCenter(placemarkToOpen.geometry.getCoordinates(), 15, {
+                            duration: 300 // Плавная анимация перемещения
+                        });
+                    }
+                });
                 container.appendChild(div);
             });
 
@@ -681,7 +695,7 @@
             myMap = new ymaps.Map('map', {
                 center: objects[0].coords, 
                 zoom: 13,
-                controls: ['zoomControl', 'fullscreenControl']
+                controls: ['zoomControl']
             });
 
             // 3. Определяем скрытые точки (координаты мостов/переходов)
@@ -712,13 +726,18 @@
                 `;
 
                 let placemark = new ymaps.Placemark(obj.coords, {
-                    balloonContentBody: content
+                    balloonContentBody: content,
+                    objectId: obj.id
                 }, {
-                    preset: preset
+                    preset: preset,
+                    balloonCloseButton: true
                 });
 
                 myMap.geoObjects.add(placemark);
-                
+                if (index === 0) {
+                    placemark.balloon.open();
+                }
+    
                 // Добавляем координату видимого объекта в маршрут
                 routeCoords.push(obj.coords);
 
@@ -783,16 +802,22 @@
                 checkZoomRange: true,
                 zoomMargin: 50
             });
+            
         }
 
-        // Функции для кнопок (оставляем как были, но openMap больше не нужна для карты)
-        function openMap() {
-            // Карта уже открыта, ничего не делаем
-            console.log("Карта уже отображается на странице.");
-        }
+
 
         function closeMap() {
-            document.getElementById('map-modal').style.display = 'none';
+             const modal = document.getElementById('map-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            // Если карта существует, уничтожаем её, чтобы сбросить размеры
+            if (myMap) {
+                myMap.destroy();
+                myMap = null;
+            }
         }
 
         function saveRoute() {
