@@ -40,7 +40,7 @@
 
         .result-title {
             font-family: 'Playfair Display', serif;
-            font-size: 2em;
+            font-size: clamp(1.6rem, 4vw + 0.8rem, 2.5rem);
             text-align: center;
             margin-bottom: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -422,6 +422,10 @@
         }
 
         @media (max-width: 768px) {
+            .result-title {
+                font-size: 1.6em; /* 👈 Уменьшаем заголовок на мобильных */
+                line-height: 1.2; /* 👈 Чтобы многострочный текст смотрелся аккуратно */
+            }
             .result-content { grid-template-columns: 1fr; }
             .map-placeholder { height: 300px; }
             .action-buttons { flex-direction: column; }
