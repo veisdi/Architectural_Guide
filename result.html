@@ -500,7 +500,7 @@
             { id: 1, name: "Дом Елисеевых", style: "moderne", coords: [59.928586, 30.337694], description: "Великолепный торговый дом с витражными окнами.", photoUrl: "asserts/images/dom_eliseevich.jpg" },
             // { id: 5, name: "Дом Бенуа", style: "moderne", coords: [59.962415, 30.312943], description: "Доходный дом архитектора Леонида Бенуа. Яркий пример северного модерна.", photoUrl: "asserts/images/dom_benua.jpg" },
             
-            { id: 6, name: "Казанский собор", style: "classic", coords: [59.930007, 30.315248], description: "Величественный собор в стиле классицизма с колоннадой.", photoUrl: "asserts/images/kazanskiy_sobor.jpg" },
+            { id: 6, name: "Казанский собор", style: "classic", coords: [59.935185, 30.325069], description: "Величественный собор в стиле классицизма с колоннадой.", photoUrl: "asserts/images/kazanskiy_sobor.jpg" },
             { id: 7, name: "Главный штаб", style: "classic", coords: [59.938013, 30.317564], description: "Монументальное здание с триумфальной аркой.", photoUrl: "asserts/images/zdanie_gl_shtaba.jpg" },
             { id: 8, name: "Исаакиевский собор", style: "classic", coords: [59.934127, 30.305973], description: "Один из крупнейших купольных храмов мира.", photoUrl: "asserts/images/isakievskiy_sobor.jpg" },
             { id: 9, name: "Мариинский дворец", style: "classic", coords: [59.930635, 30.309779], description: "Роскошный дворец в стиле классицизма.", photoUrl: "asserts/images/mariinskiy_dvorez.jpg" },
@@ -736,28 +736,35 @@
             if (routeCoords.length > 1) {
                 document.getElementById('map-stats-text').textContent = "Построение маршрута...";
                 
-                ymaps.route(routeCoords, {
-                    mapStateAutoApply: true,
-                    routingMode: 'pedestrian' // Пешеходный режим!
-                }).then(function (route) {
-                    // Очищаем все геообъекты (маркеры и старые маршруты), чтобы добавить чистый маршрут
-                    // Но нам нужны маркеры! Поэтому мы добавим маршрут поверх существующих маркеров.
-                    // В API Яндекса add(route) добавляет объект в коллекцию.
-                    
-                    myMap.geoObjects.add(route);
+                // Создаем мультимаршрут
+                let multiRoute = new ymaps.multiRouter.MultiRoute({
+                    referencePoints: routeCoords,
+                    params: {
+                        routingMode: 'pedestrian' // Гарантированный пешеходный режим
+                    }
+                }, {
+                    // Отключаем стандартные маркеры мультимаршрута (A, B, C...), чтобы не перекрывать ваши
+                    wayPointVisible: false, 
+                    planIndex: 0,
+                    // Стилизация линии прохода
+                    routeActiveStrokeColor: '#667eea',
+                    routeActiveStrokeWidth: 5,
+                    routeActiveStrokeOpacity: 0.8
+                });
 
-                    // Красим маршрут
-                    route.getPaths().options.set({
-                        strokeColor: '#667eea',
-                        strokeWidth: 5,
-                        strokeOpacity: 0.8
-                    });
+                // Добавляем на карту
+                myMap.geoObjects.add(multiRoute);
 
-                    // Обновляем дистанцию
-                    let realDistance = route.getLength() / 1000;
-                    document.getElementById('map-stats-text').textContent = `${objects.length} объектов • ${realDistance.toFixed(1)} км (пешком)`;
+                // Подписка на событие обновления данных для точной статистики
+                multiRoute.model.events.add('requestsuccess', function() {
+                    let activeRoute = multiRoute.getActiveRoute();
+                    if (activeRoute) {
+                        let realDistance = activeRoute.properties.get("distance").value / 1000;
+                        document.getElementById('map-stats-text').textContent = `${objects.length} объектов • ${realDistance.toFixed(1)} км (пешком)`;
+                    }
+                },
 
-                }, function (error) {
+             function (error) {
                     console.error('Ошибка маршрута:', error);
                     document.getElementById('map-stats-text').textContent = 'Не удалось построить маршрут.';
                     
@@ -791,7 +798,7 @@
             if (!currentResult) return;
             const archive = JSON.parse(localStorage.getItem('archGuideArchive') || '[]');
             if (archive.some(r => r.id === currentResult.id)) {
-                showToast('⚠️ Этот маршрут уже сохранён');
+                showToast('Этот маршрут уже сохранён');
                 return;
             }
             archive.unshift({
@@ -803,7 +810,7 @@
             });
             localStorage.setItem('archGuideArchive', JSON.stringify(archive));
             renderArchive();
-            showToast('✅ Маршрут сохранён!');
+            showToast('Маршрут сохранён!');
         }
 
         function deleteArchiveRoute(id) {
