@@ -1,5 +1,4 @@
 # Architectural_Guide
-Ссылка на прохождение теста
+Ссылка на сайт
 
-https://wellemo.com/quiz/take/1f1401ad-a643-68ea-b19f-f7e60765282b/ru/
-
+https://veisdi.github.io/Architectural_Guide/
